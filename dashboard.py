@@ -2,8 +2,8 @@ import pandas as pd
 import streamlit as st
 
 from analysis import Analysis
-
 analysisFunc = Analysis()
+
 data = pd.read_csv("Product Information - 2023-06-16.csv")
 limited_quota_vis, unlimited_quota_vis, stacked_bar, operators_yield, clusters_yield = analysisFunc.generate_all_visualization(data)
 
