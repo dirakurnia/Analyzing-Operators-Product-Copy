@@ -1,0 +1,148 @@
+Operator,Tabel,Pattern Paket,Keterangan Variabel,Fitur Tambahan,RegEx
+Indosat,INDOSAT DATA PURE (ID),PURE {A}GB {B}Hr,"A = Kuota utama dalam GB atau MB (integer)
+B = Masa berlaku dalam hari (integer)",,r'PURE ([0-9]+)(GB|MB) ([0-9]+)Hr'
+,INDOSAT DATA REGULER (IDN),Reg {A}GB + Unlimited Apps {B}HR,"A = Kuota utama  dalam GB (integer)
+B = masa berlaku dalam hari (integer)",Unlimited Apps,r'Reg (\d+(?:\.\d+)?)GB \+ Unlimited Apps (\d+)HR'
+,,{A}GB + {B}GB Apps {C}hr,"A = Kuota utama dalam GB (integer)
+B = Kuota aplikasi dalam GB (integer)
+C = masa berlaku dalam hari (integer)",,r'(\d+(?:\.\d+)?)GB \+ (\d+(?:\.\d+)?)GB Apps (\d+)hr'
+,,"{A}GB + {B}GB Apps, Youtube + SMS Sesama {C}hr","A = Kuota utama dalam GB (integer)
+B = Kuota aplikasi dalam GB (integer)
+C = masa berlaku dalam hari (integer)",Youtube + SMS Sesama,"r'(\d+(?:\.\d+)?)GB \+ (\d+(?:\.\d+)?)GB Apps, Youtube \+ SMS Sesama (\d+)hr'"
+,,"Unlimited Kuota + {A}GB Apps, Youtube + SMS&Telp Sesama {B}hr","A = Kuota utama  dalam GB (integer)
+B = masa berlaku dalam hari (integer)","Youtube + SMS Sesama
+Unlimited Kuota","r'Unlimited Kuota \+ (\d+(?:\.\d+)?)GB Apps, Youtube \+ SMS&Telp Sesama (\d+)hr'"
+,,Reg {A}GB + Unlimited Apps + SMS&Telp Sesama {B}hr,"A = Kuota utama  dalam GB (integer)
+B = masa berlaku dalam hari (integer)",Unlimited Apps,r'Reg (\d+(?:\.\d+)?)GB \+ Unlimited Apps \+ SMS&Telp Sesama (\d+)hr'
+,INDOSAT DATA REGULER (VOUCHER) (VIDN),Voucher {A}GB + Unlimited Apps {B}hr,"A = Kuota utama  dalam GB (integer)
+B = masa berlaku dalam hari (integer)",,r'Voucher (\d+(?:\.\d+)?)GB \+ Unlimited Apps (\d+)hr'
+,,Voucher {A}GB + {B}GB Apps {C}hr,"A = Kuota utama dalam GB (integer)
+B = Kuota aplikasi dalam GB (integer)
+C = masa berlaku dalam hari (integer)",,r'Voucher (\d+(?:\.\d+)?)GB \+ (\d+(?:\.\d+)?)GB Apps (\d+)hr'
+,,"Voucher {A}GB + {B}GB Apps, Youtube + SMS Sesama, {C}hr","A = Kuota utama dalam GB (integer)
+B = Kuota aplikasi dalam GB (integer)
+C = masa berlaku dalam hari (integer)",Youtube + SMS Sesama Operator,"r'Voucher (\d+(?:\.\d+)?)GB \+ (\d+(?:\.\d+)?)GB Apps, Youtube \+ SMS Sesama (\d+)hr'"
+,,"Voucher {A}GB + {B}GB Apps, Youtube + SMS&Telp Sesama {C}HR","A = Kuota utama dalam GB (integer)
+B = Kuota aplikasi dalam GB (integer)
+C = masa berlaku dalam hari (integer)",Youtube + SMS & Call Sesama Operator,"r'Voucher (\d+(?:\.\d+)?)GB \+ (\d+(?:\.\d+)?)GB Apps, Youtube \+ SMS&Telp Sesama (\d+)HR'"
+,,Voucher {A}GB + Unlimited Apps + SMS&Telp Sesama {B}HR,"A = Kuota utama  dalam GB (integer)
+B = masa berlaku dalam hari (integer)",SMS & Call Sesama Operator,r'Voucher (\d+(?:\.\d+)?)GB \+ Unlimited Apps \+ SMS&Telp Sesama (\d+)HR'
+,,"Voucher Unlimited Kuota + {A} Apps, Youtube + SMS&Telp Sesama {B}hr","A = Kuota aplikasi dalam GB (integer)
+B = masa berlaku dalam hari (integer)",Youtube + SMS & Call Sesama Operator,"r'Voucher Unlimited Kuota \+ (\d+(?:\.\d+)?)GB Apps, Youtube \+ SMS&Telp Sesama (\d+)hr'"
+,INDOSAT FREEDOM (IDF),Freedom {A}GB {B}Hr,"A = Kuota utama  dalam GB (integer)
+B = masa berlaku dalam hari (integer)",,r'Freedom (\d+(?:\.\d+)?)GB (\d+)Hr'
+,INDOSAT FREEDOM (VOUCHER) (VIDF),Voucher Freedom {A}GB {B}Hr,"A = Kuota utama  dalam GB (integer)
+B = masa berlaku dalam hari (integer)",,r'Voucher Freedom (\d+(?:\.\d+)?)GB (\d+)Hr'
+,INDOSAT FREEDOM COMBO (IFC),"Combo M/L/XL, {A}+{B}GB 4G, {C}hr","A = Kuota utama dalam GB (integer)
+B = Kuota Khusus 4G dalam GB (integer)
+C = Masa berlaku dalam hari (integeri)",,"r'Combo [A-Z]+\, (\d+(?:\.\d+)?)\+(\d+(?:\.\d+)?)GB 4G, (\d+)hr'"
+,"INDOSAT FREEDOM HARIAN (IDFH)
+",Freedom {A}GB {B}Hr ({C}GB/hr),"A = Kuota utama dalam GB (integer)
+B = masa berlaku dalam hari (Hari)
+C = Fair usage policy dalam GB/hari (integer)",, r'Freedom (\d+(?:\.\d+)?)GB (\d+)Hr \((\d+(?:\.\d+)?)GB/hr\)'
+,INDOSAT FREEDOM HARIAN (VOUCHER) (VIDFH),Voucher Freedom {A}GB {B}Hr ({C}GB/hr),"A = Kuota utama dalam GB (integer)
+B = masa berlaku dalam hari (Hari)
+C = Fair usage policy dalam GB/hari (integer)",, r'Voucher Freedom (\d+(?:\.\d+)?)GB (\d+)Hr \((\d+(?:\.\d+)?)GB/hr\)'
+,INDOSAT FREEDOM PLUS (VOUCHER) (VIFP),Voucher {A}GB+{B}GB (01-06) +NELP {D}mnt All {E}Hr,"A = Kuota utama dalam GB (float)
+B = Kuota malam dalam GB (integer)
+C = Durasi Telefon Gratis ke semua operator dalam menit (integer)
+D = masa berlaku dalam hari (integer)",,r'Voucher (\d+(?:\.\d+)?)GB\+(\d+(?:\.\d+)?)GB.* \+NELP (\d+)mnt All (\d+)Hr'
+,INDOSAT YELLOW (IDH),YELLOW {A}GB {B}hr,"A = Kuota utama dalam GB atau MB (integer)
+B = Masa berlaku dalam hari (integer)",,r'YELLOW ([0-9]+)(GB|MB) ([0-9]+)hr'
+,INDOSAT YELLOW (VOUCHER) (VIDH),VOUCHER YELLOW {A}GB {B}hr,"A = Kuota utama dalam GB atau MB (integer)
+B = Masa berlaku dalam hari (integer)",,r'VOUCHER YELLOW ([0-9]+)(GB|MB) ([0-9])+hr'
+Smartfren,SMARTFREN DATA NONSTOP (SMN),NONSTOP {A}HR (FUP {B}GB),"A : Masa berlaku dalam hari(integer)
+B : Fair Usage Policy dalam GB (integer)",Menelpon kualitas HD sepuasnya ke sesama nomor Smartfren,r'NONSTOP (\d+)HR \(FUP (\d+)GB\)'
+,SMARTFREN DATA NONSTOP (VOUCHER) (VSMN),VOUCHER NONSTOP {A}HR (FUP {B}GB),"A : Masa berlaku dalam hari (integer)
+B : Fair Usage Policy dalam GB (integer)",Menelpon kualitas HD sepuasnya ke sesama nomor Smartfren,r'VOUCHER NONSTOP (\d+)HR \(FUP (\d+)GB\)'
+,SMARTFREN DATA UNLIMITED (SMU),UNLIMITED 4G {A}HR (FUP {B}GB/HR),"A : Masa berlaku dalam hari (integer)
+B : Fair Usage Policy dalam GB atau MB per hari (integer)","1. Menelpon kualitas HD sepuasnya ke sesama nomor Smartfren
+2. Unlimited selama 24 jam dengan jaringan 4G",r'UNLIMITED 4G (\d+)HR \(FUP (\d+)(\w{2})/HR\)'
+,SMARTFREN DATA UNLIMITED (VOUCHER) (VSMU),VOUCHER UNLIMITED 4G {A}HR (FUP {B}GB/HR),"A : Masa berlaku dalam hari (integer)
+B : Fair Usage Policy dalam GB atau MB per hari (integer)","1. Menelpon kualitas HD sepuasnya ke sesama nomor Smartfren
+2. Unlimited selama 24 jam dengan jaringan 4G",r'VOUCHER UNLIMITED 4G (\d+)HR \(FUP (\d+)(\D+)\)'
+,SMARTFREN DATA VOLUME (SMV),VOLUME {A}GB+{B}GB Malam {C}Hr,"A : Internet siang dalam GB (float)
+B : Internet Malam dalam GB (float)
+C : Masa berlaku dalam hari(integer)",Menelpon kualitas HD sepuasnya ke sesama nomor Smartfren,r'VOLUME ([0-9.]*)GB\+([0-9.]*)GB Malam (\d+)Hr'
+,SMARTFREN DATA VOLUME (VOUCHER) (SMDV),VOUCHER {A}GB+{B}GB Malam {C}Hr,"A : Internet siang dalam GB (float)
+B : Internet Malam dalam GB (float)
+C : Masa berlaku dalam hari(integer)",Menelpon kualitas HD sepuasnya ke sesama nomor Smartfren,r'VOUCHER ([0-9.]*)GB\+([0-9.]*)GB Malam (\d+)Hr'
+Telkomsel,TELKOMSEL DATA (SDF),FLASH {A}MB {B}Hr,"A : Besar kuota dalam GB atau MB (integer)
+B : Masa berlaku dalam hari (integer)",,r'FLASH (\d+)(\w{2}) (\d+)Hr'
+,TELKOMSEL DATA BULK (SDB),BULK {A}GB + {B}GB OMG {C}hr,"A : Besar kuota internet dalam GB (integer)
+B : Besar kuota VideoMax dalam GB (integer)
+C : Masa berlaku dalam hari (integer)",,r'BULK (\d+)GB \+ (\d+)GB OMG (\d+)hr'
+,TELKOMSEL DATA BULK ALTERNATIF (SDB),BULK {A}GB + {B}GB OMG {C}hr [Alternatif],"A : Besar kuota internet dalam GB (integer)
+B : Besar kuota VideoMax dalam GB (integer)
+C : Masa berlaku dalam hari (integer)",,r'BULK (\d+)GB \+ (\d+)GB OMG (\d+)hr [Alternatif]'
+,TELKOMSEL DATA BULK PROMO (SDB),BULK {A}GB + {B}GB OMG {C}hr [Promo],"A : Besar kuota internet dalam GB (integer)
+B : Besar kuota VideoMax dalam GB (integer)
+C : Masa berlaku dalam hari (integer)",,r'BULK (\d+)GB \+ (\d+)GB OMG (\d+)hr [Promo]'
+,TELKOMSEL DATA GIGAMAX (SDG),GigaMax {A}GB + {B}GB MaxStream {C}Hr,"A : Kuota utama dalam GB (integer)
+B : Kuota MAXstream dalam GB (integer)
+C : Masa berlaku dalam hari (integer)",,r'GigaMax (\d+)GB \+ (\d+)GB MaxStream (\d+)Hr'
+,TELKOMSEL DATA LOKAL JABAR (VOUCHER) (VSDB),VOUCHER {A}GB + {B}GB JABAR {C}HR,"A : Kuota utama dalam GB (integer)
+B : Kuota lokal dalam GB (integer)
+C : Masa berlaku dalam hari (integer)",,r'VOUCHER (\d+)GB \+ (\d+)GB JABAR (\d+)HR'
+,,VOUCHER {A}GB + {B}GB OMG JABAR {C}HR,"A : Kuota utama dalam GB (integer)
+B : Kuota VideoMax dalam GB (integer)
+C : Masa berlaku dalam hari (integer)",, r'VOUCHER (\d+)GB \+ (\d+)GB OMG JABAR (\d+)HR'
+,TELKOMSEL DATA LOKAL JABODETABEK (VOUCHER) (VSDA),VOUCHER {A}GB + {B}GB JABODETABEK {C}HR,"A : Kuota utama dalam GB (integer)
+B : Kuota lokal dalam GB (integer)
+C : Masa berlaku dalam hari (integer)",,r'VOUCHER (\d+)GB \+ (\d+)GB JABODETABEK (\d+)HR'
+,,VOUCHER {A}GB + {B}GB OMG JABODETABEK {C}HR,"A : Kuota utama dalam GB (integer)
+B : Kuota VideoMax dalam GB (integer)
+C : Masa berlaku dalam hari (integer)",, r'VOUCHER (\d+)GB \+ (\d+)GB OMG JABODETABEK (\d+)HR'
+,TELKOMSEL DATA LOKAL JATENG DIY (VOUCHER) (VSDY),VOUCHER (A+GB) + (B+GB) OMG<optional> JATENG DIY (C+HR),"A = Kuota Utama dalam GB (integer)
+B = Kuota Youtube dalam GB (integer)
+C = masa berlaku dalam hari (integer)","1. Kuota lokal untuk JATENG DIY selain cilacap, brebes dan purwokerto
+2. Kuota OMG! Chat untuk akses Whatsapp, LINE, MusicMAX, GamesMAX","r""VOUCHER (\d+(?:\.\d+)?)GB \+ (\d+(?:\.\d+)?)GB .* (\d+)HR"""
+,TELKOMSEL DATA LOKAL JATIM (VOUCHER) (VSDT),VOUCHER (A+GB) + (B+GB) OMG<optional> JATIM (C+HR),"A = Kuota Utama dalam GB (integer)
+B = Kuota zona dalam GB (integer)
+C = masa berlaku dalam hari (integer)",,"r""VOUCHER (\d+(?:\.\d+)?)GB \+ (\d+(?:\.\d+)?)GB .* (\d+)HR"""
+,TELKOMSEL DATA REGULER (STG),REG (A+MB/GB) (C+hr),"A = Kuota Utama dalam GB atau mb (float)
+B = masa berlaku dalam hari (integer)",,"r""REG \d+[A-Z]+-(\d+)(MB|GB) (\d+)hr"""
+Tri,TRI AON (VOUCHER) (VTDA),"VOUCHER TRI AON (A+GB) , (B) tahun","A = Kuota Utama dalam GB(float)
+B = masa berlaku dalam hari (integer)",,"r""VOUCHER TRI AON (\d+)GB, (\d+) (\w+)"""
+,TRI DATA (TD),KUOTA (A) GB (B+hr),"A = Kuota Utama dalam GB(float)
+B = masa berlaku dalam hari (integer)",,r'KUOTA (\d+) GB (\d+)hr'
+,TRI DATA AON (TDA),TRI AON (A+GB),A = Kuota Utama dalam gb (float),,"r""TRI AON (\d+)GB"""
+,TRI DATA BM (TBM),BM (A+GB) (B+hr),"A = Kuota Utama dalam GB(float)
+B = masa berlaku dalam hari (integer)",,"r""BM (\d+(?:\.\d+)?)GB (\d+(?:\.\d+)?).*"""
+,TRI DATA GETMORE (TGM),GETMORE (A+GB) + (B+GB) Youtube (C+Hr),"A = Kuota Utama dalam GB (integer)
+B = Kuota Youtube dalam GB (integer)
+C = masa berlaku dalam hari (integer)",,"r""GETMORE (\d+)GB \+ (\d+)GB Youtube (\d+)Hr"""
+,TRI DATA HAPPY (TDP),"TRI HAPPY (A+GB) + TIKTOK , (B+HR)","A = Kuota Utama dalam GB(float)
+B = masa berlaku dalam hari (integer)",,"r'TRI HAPPY (\d+)GB \+ TIKTOK, (\d+)HR'"
+,TRI DATA HAPPY MINI (TDH),"TRI HAPPY (A+GB) ,<optional> (B+HR)","A = Kuota Utama dalam GB(float)
+B = masa berlaku dalam hari (integer)",,"r""TRI HAPPY (\d+)GB, (\d+)HR"""
+,TRI DATA REGULER (TDR),REGULER (A+MB/GB),A = Kuota Utama dalam gb atau mb (float),,"r""REGULER (\d+(?:\.\d+))([A-Z]+)"""
+,TRI DATA UNLIMITED (TDL),(A+GB) + (B+GB)<optional> (C) + UNLIMITED Youtube (D+Hr),"A = Kuota Utama dalam GB(float)
+B = masa berlaku dalam hari (integer)",,"r""(\d+)GB \+ .* (\d+)Hr"""
+AXIS,AXIS AIGO (AIGO),VOUCHER AIGO {A}GB {B}Hr,"A = Kuota Utama (GB)
+B = Masa Berlaku (Hari)",,r'VOUCHER AIGO (\d+)GB (\d+)Hr'
+,AXIS AIGO KETENGAN (AK),VOUCHER <apps> {A}GB {B}Hr,"A = Kuota Apps (GB)
+B = Masa Berlaku (Hari)",,r'.* (\d+)GB (\d+)Hr'
+,AXIS AIGO MINI (AIM),VOUCHER AIGO MINI {A}GB {b}Hr,"A = Kuota Utama (GB)
+B = Masa Berlaku (Hari)",,r'VOUCHER AIGO MINI (\d+)GB (\d+)Hr'
+,AXIS DATA BRONET (AXD),BRONET {A}MB/GB {B}Hr,"A = Kuota Utama (GB)
+B = Masa Berlaku (Hari)",,r'BRONET (\d+)(MB|GB) (\d+)Hr'
+,AXIS OWSEM (AXO),VOUCHER OWSEM {A}GB+{B}GB 4G {C}Hr,"A = Kuota Utama (GB)
+B = Kuota 4G (GB)
+C = Masa Berlaku (Hari)",,r'VOUCHER OWSEM (\d+)GB\+(\d+)GB 4G (\d+)Hr'
+XL,XL COMBO FLEX (XCF),"(A)GB+(B)GB Lokal+(C)Mnt Tlp, (D)Hr (FLEX S/M/.../XXXL)","A = Kuota Utama dalam GB (float)
+B = Kuota lokal dalam GB atau MB (float)
+C = Durasi Telpon ke semua operator (integer)
+D = Masa Berlaku dalam hari (integer)",,"r'(\d+(?:\.\d+)?)GB\+(\d+(?:\.\d+)?)(GB|MB) Lokal\+(\d+)Mnt Tlp, (\d+)Hr \.*'"
+,XL COMBO FLEX (VOUCHER) (VXCL),"VOUCHER (A)GB+(B)GB Lokal+(C)Mnt Tlp, (D)Hr (FLEX S/M/.../XXXL)","A = Kuota Utama dalam GB(float)
+B = Kuota lokal dalam GB atau MB (float)
+C = Durasi Telpon ke semua operator (integer)
+D = Masa Berlaku dalam hari (integer)",,"r'VOUCHER (\d+(?:\.\d+)?)GB\+(\d+(?:\.\d+)?)(GB|MB) Lokal\+(\d+)Mnt Tlp, (\d+)Hr \.*'"
+,XL COMBO XTRA (XCX),COMBO XTRA (A)GB+(B)GB ytb+(C)Mnt (D)Hr,"A = Kuota Utama dalam GB (float)
+B = Kuota Aplikasi dalam GB (float)
+C = Durasi Telpon ke semua operator (integer)
+D = Masa Berlaku dalam hari (integer)",,r'COMBO XTRA (\d+(?:\.\d+)?)GB\+(\d+(?:\.\d+)?)GB ytb\+(\d+)Mnt (\d+)Hr'
+,XL DATA FLAT (XDF),FLAT {A}MB {B}HR,"A = Kuota utama dalam GB atau MB (integer)
+B = masa berlaku dalam hari (integer)",,r'FLAT (\d+)(GB|MB) (\d+)HR'
+,XL HOTROD (XH),HotRod {A}GB {B}hr,"A = Kuota utama dalam GB atau MB (integer)
+B = masa berlaku dalam hari (integer)",,r'HotRod ([\d+.]*)(GB|MB) (\d+)hr'
