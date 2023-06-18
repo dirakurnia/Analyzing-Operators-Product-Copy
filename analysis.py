@@ -30,6 +30,7 @@ class Analysis:
             width=2500,
             height=800,
             color_discrete_sequence = self.discrete_color)
+        product_subproduct_counts = self._set_figure(product_subproduct_counts, 'Number of Sub-Product Per Product For Each Operators')
         
         return product_subproduct_counts
 
@@ -45,20 +46,22 @@ class Analysis:
             width=2500,
             height=800,
             color_discrete_sequence = px.colors.sequential.Viridis)
+        fup_quota_product = self._set_figure(fup_quota_product, 'Number of Each Product Type For Each Operators')
         
         return fup_quota_product
 
     def visualize_mean_operators_product_price(self, raw_data):
-        mean_var = raw_data.groupby('Operator')['Harga'].agg([np.mean, np.std]).reset_index()
+        mean_var = raw_data.groupby('Operator')['Harga'].agg([np.mean, np.std]).reset_index().rename(columns={'mean':'Price Average'})
         mean_operators_product_price = px.bar(
             mean_var,
             x="Operator",
-            y="mean",
+            y="Price Average",
             error_y = 'std',
             color='Operator',
             width=2500,
             height=800,
             color_discrete_sequence = self.discrete_color)
+        mean_operators_product_price = self._set_figure(mean_operators_product_price, 'Average of Each Operators Product Price')
         
         return mean_operators_product_price
 
@@ -178,7 +181,7 @@ class Analysis:
 
         return (centers, centers_lmt, centers_ulmt)
     
-    def _set_figure(self, fig, title, title_size=40, font_size=20):
+    def _set_figure(self, fig, title, title_size=28, font_size=20):
         fig.update_layout(title=title ,title_font_size=title_size)
         fig.update_layout(
             font=dict(
@@ -216,7 +219,7 @@ class Analysis:
             error_x="Fair Usage Policy (GB) Var",
             error_y="Harga Var",
             text = "Cluster",
-            width=1000,
+            width=1500,
             height=1000,
             color_discrete_sequence = self.discrete_color)
         unlimited_quota_vis.update_traces(textposition = 'top right')
@@ -224,6 +227,37 @@ class Analysis:
 
         return (limited_quota_vis, unlimited_quota_vis)
         
+    def visualize_clusters_characteristics(self, center_lmt, center_ulmt, cluster):
+        if cluster <= 4:
+            center_lmt = center_lmt.rename(columns={"Kuota Utama (GB) Mean":"Kuota Utama (GB)", 
+                                                    "Kuota Aplikasi (GB) Mean":"Kuota Aplikasi (GB)", 
+                                                    "Harga Mean":"Harga (Rp)",
+                                                    "Masa Berlaku (Hari) Mean":"Masa Berlaku (Hari)"})
+            data_cluster = center_lmt.loc[center_lmt['Cluster'] == cluster, :]
+            cluster_index = cluster-1
+        else:
+            center_ulmt = center_ulmt.rename(columns={"Fair Usage Policy (GB) Mean":"Fair Usage Policy (GB)", 
+                                                      "Harga Mean":"Harga (Rp)",
+                                                      "Masa Berlaku (Hari) Mean":"Masa Berlaku (Hari)"})
+            data_cluster = center_ulmt.loc[center_ulmt['Cluster'] == cluster, :]
+            cluster_index = cluster-5
+        var_columns = [col for col in data_cluster.columns if col[-3:] == 'Var']
+        mean_columns = [col for col in data_cluster.columns if col[-3:] != 'Var']
+        data_cluster_mean = data_cluster[mean_columns].T.reset_index().rename(columns={'index':'Components', cluster_index:'Mean'})
+        data_cluster_mean = data_cluster_mean.loc[data_cluster_mean['Components'] != 'Cluster', :].reset_index(drop=True)
+        data_cluster_var = data_cluster[var_columns].T.reset_index().rename(columns={cluster_index:'Errors'}).drop(columns='index')
+        data_to_plot = pd.concat([data_cluster_mean, data_cluster_var], axis=1)
+        data_to_plot = data_to_plot.loc[data_to_plot['Components'] != 'Cluster', :]
+        cluster_chars = px.bar(
+            data_to_plot,
+            x='Components',
+            y='Mean',
+            error_y='Errors',
+            color='Components'
+        )
+        cluster_chars = self._set_figure(cluster_chars, f'Cluster {cluster} Characteristics')
+        return cluster_chars
+
     def _visualize_clusters_proportions(self, clustered):
         data_cluster = clustered.groupby('Operator')['Cluster'].value_counts('Cluster').reset_index().rename(columns={'proportion':'Proportion (%)'})
         data_cluster['Proportion (%)'] = data_cluster['Proportion (%)'] * 100
@@ -300,11 +334,15 @@ class Analysis:
         
         return (scaled_lmt, scaled_ulmt, clean_yield_data_lmt, clean_yield_data_ulmt)
 
-    def generate_all_visualization(self, raw_data):
+    def create_clusters(self, raw_data):
         scaled_lmt, scaled_ulmt, clean_yield_data_lmt, clean_yield_data_ulmt = self._prepare_dataset(raw_data)
         cluster_lmt, cluster_ulmt = self._create_clusters_cmeans(4, 2, scaled_lmt, scaled_ulmt)
         raw_data_clustered, raw_data_lmt, raw_data_ulmt = self._create_data_with_cluster(clean_yield_data_lmt, clean_yield_data_ulmt, cluster_lmt, cluster_ulmt)
         centers, centers_lmt, centers_ulmt = self._create_center_cluster(raw_data_lmt, raw_data_ulmt)
+
+        return (raw_data_clustered, raw_data_lmt, raw_data_ulmt, centers, centers_lmt, centers_ulmt)    
+
+    def generate_all_visualization(self, raw_data_clustered, raw_data_lmt, raw_data_ulmt, centers, centers_lmt, centers_ulmt):
         limited_quota_vis, unlimited_quota_vis = self._visualize_clusters(centers_lmt, centers_ulmt)
         stacked_bar = self._visualize_clusters_proportions(raw_data_clustered)
         operators_yield = self._visualize_operators_yield(raw_data_clustered)
