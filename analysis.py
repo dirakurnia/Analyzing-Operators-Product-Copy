@@ -1,3 +1,22 @@
+import sys
+import subprocess
+
+# implement pip as a subprocess:
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
+'numpy'])
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
+'pandas'])
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
+'scikit-fuzzy'])
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
+'matplotlib'])
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
+'plotly'])
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
+'scikit-learn-extra'])
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
+'scikit-learn'])
+
 import re
 import warnings
 import numpy as np
@@ -206,8 +225,6 @@ class Analysis:
             error_x="Kuota Utama (GB) Var",
             error_y="Harga Var",
             text = "Cluster",
-            width=1500, 
-            height=1000,
             color_continuous_scale = self.scale_color)
         limited_quota_vis = self._set_figure(limited_quota_vis, 'Quota Product Clusters')
         limited_quota_vis.update_traces(textposition = 'top right')
@@ -219,8 +236,6 @@ class Analysis:
             error_x="Fair Usage Policy (GB) Var",
             error_y="Harga Var",
             text = "Cluster",
-            width=1500,
-            height=1000,
             color_discrete_sequence = self.discrete_color)
         unlimited_quota_vis.update_traces(textposition = 'top right')
         unlimited_quota_vis = self._set_figure(unlimited_quota_vis, 'FUP Product Clusters')
@@ -253,7 +268,8 @@ class Analysis:
             x='Components',
             y='Mean',
             error_y='Errors',
-            color='Components'
+            color='Components',
+            color_discrete_sequence = self.discrete_color
         )
         cluster_chars = self._set_figure(cluster_chars, f'Cluster {cluster} Characteristics')
         return cluster_chars
@@ -268,8 +284,6 @@ class Analysis:
             text="Cluster",
             color="Cluster",
             barmode = 'stack',
-            width=2500,
-            height=800,
             color_continuous_scale = self.scale_color)
         stacked_bar = self._set_figure(stacked_bar, "Clusters Proportions For Each Operators")
 
@@ -304,8 +318,6 @@ class Analysis:
             x="Operator",
             y="Yield ((Rp/GB)/Hari)",
             color='Operator',
-            width=1200,
-            height=800,
             color_discrete_sequence = self.discrete_color)
         operators_yield = self._set_figure(operators_yield, 'Yield For Each Operators')
 
@@ -317,8 +329,6 @@ class Analysis:
             x='Cluster',
             y='Yield ((Rp/GB)/Hari)',
             color="Cluster", 
-            width=1200, 
-            height=800,
             color_discrete_sequence = self.discrete_color)
         cluster_yield = self._set_figure(cluster_yield, "Yield For Each Clusters")
 

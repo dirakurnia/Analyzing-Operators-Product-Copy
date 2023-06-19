@@ -13,7 +13,6 @@ st.set_page_config(page_title="XL's Data Product Market Position", page_icon=":r
 
 tab1, tab2 = st.tabs(["Analysis", 'Appendix'])
 
-
 with tab1:
     with st.container():
         obj, kpi = st.columns((3, 1), gap='small')
@@ -52,18 +51,18 @@ with tab1:
     with col2:
         st.plotly_chart(clusters_yield)
 
-with tab2:
-    with st.container():
-        col1, pad1, col2 = st.columns((15,0.5,15))
+# with tab2:
+#     with st.container():
+#         col1, pad1, col2 = st.columns((15,0.5,15))
 
-        with col1:
-            product_subproduct_counts = analysisFunc.visualize_product_subproduct_counts(data)
-            st.plotly_chart(product_subproduct_counts)
+#         with col1:
+#             product_subproduct_counts = analysisFunc.visualize_product_subproduct_counts(data)
+#             st.plotly_chart(product_subproduct_counts)
 
-        with col2:
-            fup_quota_product = analysisFunc.visualize_fup_quota_product(data)
-            st.plotly_chart(fup_quota_product)
+#         with col2:
+#             fup_quota_product = analysisFunc.visualize_fup_quota_product(data)
+#             st.plotly_chart(fup_quota_product)
 
-    with st.container():
-        mean_operators_product_price = analysisFunc.visualize_mean_operators_product_price(data)
-        st.plotly_chart(mean_operators_product_price)
+#     with st.container():
+#         mean_operators_product_price = analysisFunc.visualize_mean_operators_product_price(data)
+#         st.plotly_chart(mean_operators_product_price)
