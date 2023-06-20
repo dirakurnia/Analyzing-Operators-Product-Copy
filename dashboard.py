@@ -13,6 +13,7 @@ st.set_page_config(page_title="XL's Data Product Market Position", page_icon=":r
 
 tab1, tab2 = st.tabs(["Analysis", 'Appendix'])
 
+
 with tab1:
     with st.container():
         obj, kpi = st.columns((3, 1), gap='small')
@@ -30,26 +31,26 @@ with tab1:
     with st.container():
         left_column, pad, right_column = st.columns((9,1,11))
         with left_column:
-            st.plotly_chart(unlimited_quota_vis)
+            st.plotly_chart(unlimited_quota_vis, use_container_width = True)
         with right_column:
-            st.plotly_chart(limited_quota_vis)
+            st.plotly_chart(limited_quota_vis, use_container_width = True)
 
     with st.container():
         cluster = st.selectbox('Pick a Cluster', [i for i in range(1, 7)])
         cluster_chars = analysisFunc.visualize_clusters_characteristics(centers_lmt, centers_ulmt, cluster)
-        st.plotly_chart(cluster_chars)
+        st.plotly_chart(cluster_chars, use_container_width = True)
     
     with st.container():
-        st.plotly_chart(stacked_bar)
+        st.plotly_chart(stacked_bar, use_container_width = True)
 
     with st.container():
         col1, pad1, col2 = st.columns((15,0.5,15))
 
     with col1:
-        st.plotly_chart(operators_yield)
+        st.plotly_chart(operators_yield, use_container_width = True)
 
     with col2:
-        st.plotly_chart(clusters_yield)
+        st.plotly_chart(clusters_yield, use_container_width = True)
 
 # with tab2:
 #     with st.container():
@@ -57,12 +58,12 @@ with tab1:
 
 #         with col1:
 #             product_subproduct_counts = analysisFunc.visualize_product_subproduct_counts(data)
-#             st.plotly_chart(product_subproduct_counts)
+#             st.plotly_chart(product_subproduct_counts, use_container_width = True)
 
 #         with col2:
 #             fup_quota_product = analysisFunc.visualize_fup_quota_product(data)
-#             st.plotly_chart(fup_quota_product)
+#             st.plotly_chart(fup_quota_product, use_container_width = True)
 
 #     with st.container():
 #         mean_operators_product_price = analysisFunc.visualize_mean_operators_product_price(data)
-#         st.plotly_chart(mean_operators_product_price)
+#         st.plotly_chart(mean_operators_product_price, use_container_width = True)

@@ -1,21 +1,21 @@
-import sys
-import subprocess
+# import sys
+# import subprocess
 
-# implement pip as a subprocess:
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
-'numpy'])
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
-'pandas'])
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
-'scikit-fuzzy'])
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
-'matplotlib'])
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
-'plotly'])
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
-'scikit-learn-extra'])
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
-'scikit-learn'])
+# # implement pip as a subprocess:
+# subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
+# 'numpy'])
+# subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
+# 'pandas'])
+# subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
+# 'scikit-fuzzy'])
+# subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
+# 'matplotlib'])
+# subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
+# 'plotly'])
+# subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
+# 'scikit-learn-extra'])
+# subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
+# 'scikit-learn'])
 
 import re
 import warnings
