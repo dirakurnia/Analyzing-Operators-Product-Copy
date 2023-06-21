@@ -11,6 +11,7 @@ def fix_missing_values(column_values):
             fixed.append(fixed[i-1])
         else:
             fixed.append(column_values[i])
+            
     return fixed
 
 def fix_columns(data):
@@ -52,9 +53,7 @@ def convert_raw_label(data):
                                  'kuota lokal dalam gb'],
             'Durasi Gratis Telepon ke Semua Operator (Menit)' : ['durasi telpon ke semua operator']
                                     }
-
     full = []
-
     for val in data['Keterangan Variabel'].values:
         temp = []
         for v in val:
@@ -63,8 +62,6 @@ def convert_raw_label(data):
                     temp.append(key)
                     break
         full.append(np.array(temp))
-        
-
     data['Keterangan Variabel'] = np.array(full)
     return data
 
