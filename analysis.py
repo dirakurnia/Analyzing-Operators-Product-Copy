@@ -146,7 +146,7 @@ class Analysis:
         scaled_data = scaled_data.values.T
         store_fpc = []
         for nclusters in range(1, 10):
-            _, _, _, _, _, _, fpc = fuzz.cluster.cmeans(scaled_data, nclusters, 1.25, error=0.005, maxiter=1000, init=None)
+            _, _, _, _, _, _, fpc = fuzz.cluster.cmeans(scaled_data, nclusters, 1.2, error=0.05, maxiter=3000, init=None)
             store_fpc.append(fpc)
         plt.scatter([i for i in range(1, 10)], store_fpc)
         plt.show()
@@ -180,7 +180,7 @@ class Analysis:
     def _create_clusters_cmeans(self, k_lmt, k_ulmt, k_apps, scaled_lmt, scaled_ulmt, scaled_apps) :
         store_k = [k_lmt, k_ulmt, k_apps]
         store_scaled_data = [scaled_lmt, scaled_ulmt, scaled_apps]
-        params = [1.35, 1.5, 1.35]
+        params = [1.35, 1.5, 1.3]
         store_clusters = []
         for k, scaled_data, param in zip(store_k, store_scaled_data, params):
             cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(scaled_data.values.T, k, param, error=0.005, maxiter=1000, init=None)
@@ -285,14 +285,15 @@ class Analysis:
                                                       "Harga Mean":"Harga (Rp)",
                                                       "Masa Berlaku (Hari) Mean":"Masa Berlaku (Hari)"})
             data_cluster = center_ulmt.loc[center_ulmt['Cluster'] == cluster, :]
-            cluster_index = cluster-5
+            cluster_index = cluster-4
         else:
             center_apps = center_apps.rename(columns={"Kuota Utama (GB) Mean":"Kuota Utama (GB)", 
                                                     "Kuota Aplikasi (GB) Mean":"Kuota Aplikasi (GB)",
                                                     "Harga Mean":"Harga (Rp)",
                                                     "Masa Berlaku (Hari) Mean":"Masa Berlaku (Hari)"})
             data_cluster = center_apps.loc[center_apps['Cluster'] == cluster, :]
-            cluster_index = cluster-7
+            cluster_index = cluster-6
+
         var_columns = [col for col in data_cluster.columns if col[-3:] == 'Var']
         mean_columns = [col for col in data_cluster.columns if col[-3:] != 'Var']
         data_cluster_mean = data_cluster[mean_columns].T.reset_index().rename(columns={'index':'Components', cluster_index:'Mean'})
@@ -384,7 +385,10 @@ class Analysis:
 
     def create_clusters(self, raw_data):
         scaled_lmt, scaled_ulmt, scaled_apps, clean_yield_data_lmt, clean_yield_data_ulmt, clean_yield_data_apps = self._prepare_dataset(raw_data)
-        # self.calculate_fpc(scaled_lmt)
+        # self.create_elbow_plot_kmeans(scaled_ulmt)
+        # self.create_elbow_plot_kmedians(scaled_ulmt)
+        # self.calculate_fpc(scaled_ulmt)
+        
         # cluster_lmt, cluster_ulmt = self._create_clusters_kmeans(4, 2, scaled_lmt, scaled_ulmt)
         # cluster_lmt, cluster_ulmt = self._create_clusters_kmedians(4, 2, scaled_lmt, scaled_ulmt)
         cluster_lmt, cluster_ulmt, cluster_apps = self._create_clusters_cmeans(3, 2, 2, scaled_lmt, scaled_ulmt, scaled_apps)

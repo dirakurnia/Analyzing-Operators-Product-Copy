@@ -46,7 +46,7 @@ with tab2:
             st.subheader("Clusters & Yields")
     st.write('---')
     with st.container():
-        left_column, _, mid_column, _, right_column = st.columns((8,1,8,1,8))
+        left_column, _, mid_column, _, right_column = st.columns((7, 0.1, 7, 0.1, 10), gap='small')
         with left_column:
             st.plotly_chart(unlimited_quota_vis, use_container_width = True)
         with mid_column:
