@@ -55,7 +55,7 @@ with tab2:
             st.plotly_chart(internet_apps_quota_vis, use_container_width = True)
 
     with st.container():
-        cluster = st.selectbox('Pick a Cluster', [i for i in range(1, 7)])
+        cluster = st.selectbox('Pick a Cluster', [i for i in range(1, 8)])
         cluster_chars = analysisFunc.visualize_clusters_characteristics(centers_lmt, centers_ulmt, centers_apps, cluster)
         st.plotly_chart(cluster_chars, use_container_width = True)
     
