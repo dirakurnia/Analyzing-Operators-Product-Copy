@@ -1,6 +1,5 @@
 # import sys
-# import subprocess
-
+# import subproces
 # # implement pip as a subprocess:
 # subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
 # 'numpy'])
@@ -87,8 +86,9 @@ class Analysis:
     def _split_data(self, raw_data) :
         raw_data_lmt = raw_data.loc[raw_data['Fair Usage Policy (GB)'] == 0,:]
         raw_data_ulmt = raw_data.loc[raw_data['Fair Usage Policy (GB)'] != 0,:]
+        raw_data_apps =  raw_data.loc[raw_data['Kuota Aplikasi (GB)'] != 0,:]
         
-        return (raw_data_lmt, raw_data_ulmt)
+        return (raw_data_lmt, raw_data_ulmt, raw_data_apps)
     
     def _scale_data(self, raw_data):
         columns = ['Harga',
@@ -142,6 +142,17 @@ class Analysis:
 
         return
     
+    def calculate_fpc(self, scaled_data):
+        scaled_data = scaled_data.values.T
+        store_fpc = []
+        for nclusters in range(1, 10):
+            _, _, _, _, _, _, fpc = fuzz.cluster.cmeans(scaled_data, nclusters, 1.25, error=0.005, maxiter=1000, init=None)
+            store_fpc.append(fpc)
+        plt.scatter([i for i in range(1, 10)], store_fpc)
+        plt.show()
+
+        return 
+
     def _create_clusters_kmeans(self, k_lmt, k_ulmt, scaled_lmt, scaled_ulmt) :
         store_k = [k_lmt, k_ulmt]
         store_scaled_data = [scaled_lmt, scaled_ulmt]
@@ -166,39 +177,47 @@ class Analysis:
         
         return tuple(store_clusters)
     
-    def _create_clusters_cmeans(self, k_lmt, k_ulmt, scaled_lmt, scaled_ulmt) :
-        cntr_lmt, u_lmt, u0_lmt, d_lmt, jm_lmt, p_lmt, fpc_lmt = fuzz.cluster.cmeans(scaled_lmt.values.T, k_lmt, 1.25, error=0.005, maxiter=1000, init=None)
-        cluster_lmt = np.argmax(u_lmt, axis=0) + 1
-        cntr_ulmt, u_ulmt, u0_ulmt, d_ulmt, jm_ulmt, p_ulmt, fpc_ulmt = fuzz.cluster.cmeans(scaled_ulmt.values.T, k_ulmt, 1.5, error=0.005, maxiter=1000, init=None)
-        cluster_ulmt = np.argmax(u_ulmt, axis=0) + 1 + k_lmt
-        # print(fpc_lmt)
-        # print(fpc_ulmt)
+    def _create_clusters_cmeans(self, k_lmt, k_ulmt, k_apps, scaled_lmt, scaled_ulmt, scaled_apps) :
+        store_k = [k_lmt, k_ulmt, k_apps]
+        store_scaled_data = [scaled_lmt, scaled_ulmt, scaled_apps]
+        params = [1.35, 1.5, 1.35]
+        store_clusters = []
+        for k, scaled_data, param in zip(store_k, store_scaled_data, params):
+            cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(scaled_data.values.T, k, param, error=0.005, maxiter=1000, init=None)
+            cluster = np.argmax(u, axis=0) + 1
+            store_clusters.append(cluster)
         
-        return (cluster_lmt, cluster_ulmt)
+        return tuple(store_clusters)
 
-    def _create_data_with_cluster(self, raw_data_lmt, raw_data_ulmt, cluster_lmt, cluster_ulmt):
-        raw_data_lmt = raw_data_lmt.drop(columns='Fair Usage Policy (GB)')
-        raw_data_ulmt = raw_data_ulmt.drop(columns='Kuota Utama (GB)')
+    def _create_data_with_cluster(self, raw_data_lmt, raw_data_ulmt, raw_data_apps, cluster_lmt, cluster_ulmt, cluster_apps):
+        raw_data_lmt = raw_data_lmt.drop(columns=['Kuota Aplikasi (GB)', 'Fair Usage Policy (GB)'])
+        raw_data_ulmt = raw_data_ulmt.drop(columns=['Kuota Utama (GB)', 'Kuota Aplikasi (GB)'])
+        raw_data_apps = raw_data_apps.drop(columns='Fair Usage Policy (GB)')
         raw_data_lmt['Cluster'] = cluster_lmt
-        raw_data_ulmt['Cluster'] = cluster_ulmt
-        raw_data_clustered = pd.concat([raw_data_lmt, raw_data_ulmt]).fillna(0)
+        raw_data_ulmt['Cluster'] = cluster_ulmt + np.max(cluster_lmt)
+        raw_data_apps['Cluster'] = cluster_apps + np.max(cluster_lmt)  + np.max(cluster_ulmt)
+        raw_data_clustered = pd.concat([raw_data_lmt, raw_data_ulmt, raw_data_apps]).fillna(0)
 
-        return (raw_data_clustered, raw_data_lmt, raw_data_ulmt)
+        return (raw_data_clustered, raw_data_lmt, raw_data_ulmt, raw_data_apps)
 
-    def _create_center_cluster(self, raw_data_lmt, raw_data_ulmt):
-        lmt_columns = ['Harga','Kuota Utama (GB)', 'Kuota Aplikasi (GB)', 'Masa Berlaku (Hari)']
+    def _create_center_cluster(self, raw_data_lmt, raw_data_ulmt, raw_data_apps):
+        lmt_columns = ['Harga','Kuota Utama (GB)', 'Masa Berlaku (Hari)']
         ulmt_columns = ['Harga','Fair Usage Policy (GB)', 'Masa Berlaku (Hari)']
-        centers_lmt_mean = raw_data_lmt.groupby('Cluster')[lmt_columns].mean().reset_index()
-        centers_lmt_var = raw_data_lmt.groupby('Cluster')[lmt_columns].std().reset_index()
-        centers_ulmt_mean = raw_data_ulmt.groupby('Cluster')[ulmt_columns].mean().reset_index()
-        centers_ulmt_var = raw_data_ulmt.groupby('Cluster')[ulmt_columns].std().reset_index()
-        centers_mean = pd.concat([centers_lmt_mean, centers_ulmt_mean]).fillna(0)
-        centers_var = pd.concat([centers_lmt_var, centers_ulmt_var]).fillna(0)
-        centers = centers_mean.merge(centers_var, on='Cluster', suffixes=[' Mean', ' Var'])
-        centers_lmt = centers_lmt_mean.merge(centers_lmt_var, on='Cluster', suffixes=[' Mean', ' Var'])
-        centers_ulmt = centers_ulmt_mean.merge(centers_ulmt_var, on='Cluster', suffixes=[' Mean', ' Var'])
+        app_columns = ['Harga','Kuota Utama (GB)', 'Kuota Aplikasi (GB)', 'Masa Berlaku (Hari)']
+        combined_centers_mean = pd.DataFrame()
+        combined_centers_var = pd.DataFrame()
+        centers = []
 
-        return (centers, centers_lmt, centers_ulmt)
+        for columns, raw_data in zip([lmt_columns, ulmt_columns, app_columns],[raw_data_lmt, raw_data_ulmt, raw_data_apps]):
+            centers_mean = raw_data.groupby('Cluster')[columns].mean().reset_index()
+            centers_var = raw_data.groupby('Cluster')[columns].std().reset_index()
+            combined_centers_mean = pd.concat([combined_centers_mean, centers_mean]).fillna(0)
+            combined_centers_var = pd.concat([combined_centers_var, centers_var]).fillna(0)
+            combined_centers = centers_mean.merge(centers_var, on='Cluster', suffixes=[' Mean', ' Var'])
+            centers.append(combined_centers)
+        combined_centers = centers_mean.merge(centers_var, on='Cluster', suffixes=[' Mean', ' Var'])
+
+        return (combined_centers, tuple(centers))
     
     def _set_figure(self, fig, title, title_size=28, font_size=20):
         fig.update_layout(title=title ,title_font_size=title_size)
@@ -213,20 +232,20 @@ class Analysis:
 
         return fig
 
-    def _visualize_clusters(self, center_lmt, center_ulmt):
-        center_lmt = center_lmt.rename(columns={"Kuota Utama (GB) Mean":"Kuota Utama (GB)", "Kuota Aplikasi (GB) Mean":"Kuota Aplikasi (GB)", "Harga Mean":"Harga (Rp)"})
+    def _visualize_clusters(self, center_lmt, center_ulmt, center_apps):
+        center_lmt = center_lmt.rename(columns={"Kuota Utama (GB) Mean":"Kuota Utama (GB)", "Harga Mean":"Harga (Rp)"})
         center_ulmt = center_ulmt.rename(columns={"Fair Usage Policy (GB) Mean":"Fair Usage Policy (GB)", "Harga Mean":"Harga (Rp)"})
+        center_apps = center_apps.rename(columns={"Kuota Utama (GB) Mean":"Kuota Utama (GB)", "Kuota Aplikasi (GB) Mean":"Kuota Aplikasi (GB)", "Harga Mean":"Harga (Rp)"})
         limited_quota_vis = px.scatter(
             center_lmt,
             x="Kuota Utama (GB)",
-            color="Kuota Aplikasi (GB)",
             y="Harga (Rp)",
             size="Masa Berlaku (Hari) Mean",
             error_x="Kuota Utama (GB) Var",
             error_y="Harga Var",
             text = "Cluster",
             color_continuous_scale = self.scale_color)
-        limited_quota_vis = self._set_figure(limited_quota_vis, 'Quota Product Clusters')
+        limited_quota_vis = self._set_figure(limited_quota_vis, 'Internet Quota Product Clusters')
         limited_quota_vis.update_traces(textposition = 'top right')
         unlimited_quota_vis = px.scatter(
             center_ulmt,
@@ -239,23 +258,41 @@ class Analysis:
             color_discrete_sequence = self.discrete_color)
         unlimited_quota_vis.update_traces(textposition = 'top right')
         unlimited_quota_vis = self._set_figure(unlimited_quota_vis, 'FUP Product Clusters')
+        internet_apps_quota_vis = px.scatter(
+            center_apps,
+            x="Kuota Utama (GB)",
+            y="Harga (Rp)",
+            color="Kuota Aplikasi (GB)",
+            size="Masa Berlaku (Hari) Mean",
+            error_x="Kuota Utama (GB) Var",
+            error_y="Harga Var",
+            text = "Cluster",
+            color_continuous_scale = self.scale_color)
+        internet_apps_quota_vis.update_traces(textposition = 'top right')
+        internet_apps_quota_vis = self._set_figure(internet_apps_quota_vis, 'Internet and Apps Quota Product Clusters')
 
-        return (limited_quota_vis, unlimited_quota_vis)
+        return (limited_quota_vis, unlimited_quota_vis, internet_apps_quota_vis)
         
-    def visualize_clusters_characteristics(self, center_lmt, center_ulmt, cluster):
-        if cluster <= 4:
+    def visualize_clusters_characteristics(self, center_lmt, center_ulmt, center_apps, cluster):
+        if cluster <= 3:
             center_lmt = center_lmt.rename(columns={"Kuota Utama (GB) Mean":"Kuota Utama (GB)", 
-                                                    "Kuota Aplikasi (GB) Mean":"Kuota Aplikasi (GB)", 
                                                     "Harga Mean":"Harga (Rp)",
                                                     "Masa Berlaku (Hari) Mean":"Masa Berlaku (Hari)"})
             data_cluster = center_lmt.loc[center_lmt['Cluster'] == cluster, :]
             cluster_index = cluster-1
-        else:
+        elif cluster <= 5:
             center_ulmt = center_ulmt.rename(columns={"Fair Usage Policy (GB) Mean":"Fair Usage Policy (GB)", 
                                                       "Harga Mean":"Harga (Rp)",
                                                       "Masa Berlaku (Hari) Mean":"Masa Berlaku (Hari)"})
             data_cluster = center_ulmt.loc[center_ulmt['Cluster'] == cluster, :]
             cluster_index = cluster-5
+        else:
+            center_apps = center_apps.rename(columns={"Kuota Utama (GB) Mean":"Kuota Utama (GB)", 
+                                                    "Kuota Aplikasi (GB) Mean":"Kuota Aplikasi (GB)",
+                                                    "Harga Mean":"Harga (Rp)",
+                                                    "Masa Berlaku (Hari) Mean":"Masa Berlaku (Hari)"})
+            data_cluster = center_apps.loc[center_apps['Cluster'] == cluster, :]
+            cluster_index = cluster-7
         var_columns = [col for col in data_cluster.columns if col[-3:] == 'Var']
         mean_columns = [col for col in data_cluster.columns if col[-3:] != 'Var']
         data_cluster_mean = data_cluster[mean_columns].T.reset_index().rename(columns={'index':'Components', cluster_index:'Mean'})
@@ -338,24 +375,29 @@ class Analysis:
         raw_data = raw_data.loc[raw_data['Masa Berlaku (Hari)'] <= 30, :]
         yield_raw_data = self._generate_yield_data(raw_data)
         clean_yield_data = self._clean_outliers(yield_raw_data)
-        clean_yield_data_lmt, clean_yield_data_ulmt = self._split_data(clean_yield_data)
+        clean_yield_data_lmt, clean_yield_data_ulmt, clean_yield_data_apps = self._split_data(clean_yield_data)
         scaled_lmt, _ = self._scale_data(clean_yield_data_lmt)
         scaled_ulmt, _ = self._scale_data(clean_yield_data_ulmt)
-        
-        return (scaled_lmt, scaled_ulmt, clean_yield_data_lmt, clean_yield_data_ulmt)
+        scaled_apps, _ = self._scale_data(clean_yield_data_apps)
+
+        return (scaled_lmt, scaled_ulmt, scaled_apps, clean_yield_data_lmt, clean_yield_data_ulmt, clean_yield_data_apps)
 
     def create_clusters(self, raw_data):
-        scaled_lmt, scaled_ulmt, clean_yield_data_lmt, clean_yield_data_ulmt = self._prepare_dataset(raw_data)
-        cluster_lmt, cluster_ulmt = self._create_clusters_cmeans(4, 2, scaled_lmt, scaled_ulmt)
-        raw_data_clustered, raw_data_lmt, raw_data_ulmt = self._create_data_with_cluster(clean_yield_data_lmt, clean_yield_data_ulmt, cluster_lmt, cluster_ulmt)
-        centers, centers_lmt, centers_ulmt = self._create_center_cluster(raw_data_lmt, raw_data_ulmt)
+        scaled_lmt, scaled_ulmt, scaled_apps, clean_yield_data_lmt, clean_yield_data_ulmt, clean_yield_data_apps = self._prepare_dataset(raw_data)
+        # self.calculate_fpc(scaled_lmt)
+        # cluster_lmt, cluster_ulmt = self._create_clusters_kmeans(4, 2, scaled_lmt, scaled_ulmt)
+        # cluster_lmt, cluster_ulmt = self._create_clusters_kmedians(4, 2, scaled_lmt, scaled_ulmt)
+        cluster_lmt, cluster_ulmt, cluster_apps = self._create_clusters_cmeans(3, 2, 2, scaled_lmt, scaled_ulmt, scaled_apps)
+        raw_data_clustered, raw_data_lmt, raw_data_ulmt, raw_data_apps = self._create_data_with_cluster(clean_yield_data_lmt, clean_yield_data_ulmt, clean_yield_data_apps, 
+                                                                                                        cluster_lmt, cluster_ulmt, cluster_apps)
+        centers, (centers_lmt, centers_ulmt, centers_apps) = self._create_center_cluster(raw_data_lmt, raw_data_ulmt, raw_data_apps)
 
-        return (raw_data_clustered, raw_data_lmt, raw_data_ulmt, centers, centers_lmt, centers_ulmt)    
+        return (raw_data_clustered, raw_data_lmt, raw_data_ulmt, raw_data_apps, centers, centers_lmt, centers_ulmt, centers_apps)    
 
-    def generate_all_visualization(self, raw_data_clustered, raw_data_lmt, raw_data_ulmt, centers, centers_lmt, centers_ulmt):
-        limited_quota_vis, unlimited_quota_vis = self._visualize_clusters(centers_lmt, centers_ulmt)
+    def generate_all_visualization(self, raw_data_clustered, raw_data_lmt, raw_data_ulmt, centers, centers_lmt, centers_ulmt, center_apps):
+        limited_quota_vis, unlimited_quota_vis, internet_apps_quota_vis = self._visualize_clusters(centers_lmt, centers_ulmt, center_apps)
         stacked_bar = self._visualize_clusters_proportions(raw_data_clustered)
         operators_yield = self._visualize_operators_yield(raw_data_clustered)
         clusters_yield = self._visualize_cluster_yield(raw_data_clustered)
 
-        return (limited_quota_vis, unlimited_quota_vis, stacked_bar, operators_yield, clusters_yield)
+        return (limited_quota_vis, unlimited_quota_vis, internet_apps_quota_vis, stacked_bar, operators_yield, clusters_yield)
