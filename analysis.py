@@ -24,8 +24,10 @@ import skfuzzy as fuzz
 import plotly.express as px
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 from sklearn_extra.cluster import KMedoids
 from sklearn.preprocessing import StandardScaler
+
 
 warnings.simplefilter("ignore")
 
@@ -52,8 +54,16 @@ class Analysis:
         
         return product_subproduct_counts
 
-    def visualize_fup_quota_product(self, raw_data):
-        raw_data['Jenis Produk'] = raw_data['Kuota Utama (GB)'].apply(lambda x : "Limited" if x > 0 else "Unlimited")
+    def visualize_product_type(self, raw_data):
+        temp_label = []
+        for main, app in zip(raw_data['Kuota Utama (GB)'].values, raw_data['Kuota Aplikasi (GB)'].values,):
+            if main != 0 and app == 0:
+                temp_label.append("Main Quota")
+            elif main != 0 and app != 0:
+                temp_label.append("Combination Quota")
+            else:
+                temp_label.append("Unlimited Quota")
+        raw_data['Jenis Produk'] = np.array(temp_label)
         val_count = raw_data.groupby('Operator')['Jenis Produk'].value_counts().reset_index().rename(columns={'count':'Count'})
         fup_quota_product = px.bar(
             val_count,
@@ -112,6 +122,14 @@ class Analysis:
 
         return (scaled_data, store_scalers)
 
+    def _PCA_decomposition(self, scaled_data, n_components):
+        pca = PCA(n_components=n_components)
+        pca.fit(scaled_data)
+        pca_samples = pca.transform(scaled_data)
+        pca_samples = pd.DataFrame(pca_samples)
+        
+        return pca_samples
+    
     def create_elbow_plot_kmeans(self, scaled_data) :
         kmeans = KMeans().fit(scaled_data)
         score = []
@@ -165,15 +183,14 @@ class Analysis:
         
         return tuple(store_clusters)
 
-    def _create_clusters_kmedians(self, k_lmt, k_ulmt, scaled_lmt, scaled_ulmt) :
-        store_k = [k_lmt, k_ulmt]
-        store_scaled_data = [scaled_lmt, scaled_ulmt]
+    def _create_clusters_kmedians(self, k_lmt, k_ulmt, k_app, scaled_lmt, scaled_ulmt, scaled_app) :
+        store_k = [k_lmt, k_ulmt, k_app]
+        store_scaled_data = [scaled_lmt, scaled_ulmt, scaled_app]
         store_clusters = []
         for k, scaled_data in zip(store_k, store_scaled_data):
             kmedians = KMedoids(n_clusters=k, init="k-medoids++").fit(scaled_data)
             clusters = kmedians.labels_ + 1
             store_clusters.append(clusters)
-        clusters[1] = clusters[1] + k_lmt
         
         return tuple(store_clusters)
     
@@ -385,13 +402,9 @@ class Analysis:
 
     def create_clusters(self, raw_data):
         scaled_lmt, scaled_ulmt, scaled_apps, clean_yield_data_lmt, clean_yield_data_ulmt, clean_yield_data_apps = self._prepare_dataset(raw_data)
-        # self.create_elbow_plot_kmeans(scaled_ulmt)
-        # self.create_elbow_plot_kmedians(scaled_ulmt)
-        # self.calculate_fpc(scaled_ulmt)
-        
-        # cluster_lmt, cluster_ulmt = self._create_clusters_kmeans(4, 2, scaled_lmt, scaled_ulmt)
-        # cluster_lmt, cluster_ulmt = self._create_clusters_kmedians(4, 2, scaled_lmt, scaled_ulmt)
-        cluster_lmt, cluster_ulmt, cluster_apps = self._create_clusters_cmeans(3, 2, 2, scaled_lmt, scaled_ulmt, scaled_apps)
+        scaled_ulmt_decomp = self._PCA_decomposition(scaled_ulmt, 2)
+        self.calculate_fpc(scaled_apps)
+        cluster_lmt, cluster_ulmt, cluster_apps = self._create_clusters_cmeans(3, 2, 3, scaled_lmt, scaled_ulmt_decomp, scaled_apps)
         raw_data_clustered, raw_data_lmt, raw_data_ulmt, raw_data_apps = self._create_data_with_cluster(clean_yield_data_lmt, clean_yield_data_ulmt, clean_yield_data_apps, 
                                                                                                         cluster_lmt, cluster_ulmt, cluster_apps)
         centers, (centers_lmt, centers_ulmt, centers_apps) = self._create_center_cluster(raw_data_lmt, raw_data_ulmt, raw_data_apps)

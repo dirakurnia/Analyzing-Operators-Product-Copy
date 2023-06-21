@@ -24,7 +24,7 @@ with tab1:
             st.plotly_chart(product_subproduct_counts, use_container_width = True)
 
         with col2:
-            fup_quota_product = analysisFunc.visualize_fup_quota_product(data)
+            fup_quota_product = analysisFunc.visualize_product_type(data)
             st.plotly_chart(fup_quota_product, use_container_width = True)
 
     with st.container():
@@ -48,14 +48,14 @@ with tab2:
     with st.container():
         left_column, _, mid_column, _, right_column = st.columns((7, 0.1, 7, 0.1, 10), gap='small')
         with left_column:
-            st.plotly_chart(unlimited_quota_vis, use_container_width = True)
-        with mid_column:
             st.plotly_chart(limited_quota_vis, use_container_width = True)
+        with mid_column:
+            st.plotly_chart(unlimited_quota_vis, use_container_width = True)
         with right_column:
             st.plotly_chart(internet_apps_quota_vis, use_container_width = True)
 
     with st.container():
-        cluster = st.selectbox('Pick a Cluster', [i for i in range(1, 8)])
+        cluster = st.selectbox('Pick a Cluster', [i for i in range(1, 9)])
         cluster_chars = analysisFunc.visualize_clusters_characteristics(centers_lmt, centers_ulmt, centers_apps, cluster)
         st.plotly_chart(cluster_chars, use_container_width = True)
     
