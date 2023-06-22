@@ -19,14 +19,14 @@ scaled_data_apps = data_prep.PCA_decomposition(scaled_data_apps, 3)
 data_with_clusters, data_lmt, data_ulmt, data_apps, center_lmt, center_ulmt, center_apps = clustering.create_clusters(data_lmt, data_ulmt, data_apps, scaled_data_lmt, scaled_data_ulmt, scaled_data_apps)
 
 convert = {
-    'High Main':1,
-    'Small Main':2,
-    'Medium Main':3,
-    'Premium Unlimited':4,
-    'Economy Unlimited':5,
-    '50:50 Small App and Main':6,
-    '80:20 High App and Main':7,
-    '20:80 Medium Main and App':8
+    'High Main (1)':1,
+    'Small Main (2)':2,
+    'Medium Main (3)':3,
+    'Premium Unlimited (4)':4,
+    'Economy Unlimited (5)':5,
+    '50:50 Small App and Main (6)':6,
+    '80:20 High App and Main (7)':7,
+    '20:80 Medium Main and App (8)':8
 }
 
 st.set_option('deprecation.showPyplotGlobalUse', False)

@@ -16,6 +16,19 @@ class clustering_functions:
     def __init__(self):
         self.scale_color = 'inferno'
         self.discrete_color = px.colors.sequential.Inferno
+        self.discrete_color2 = {"AXIS" : "#6F2791", "XL" : "#01478F", "Telkomsel" : "#ED0226","Indosat" : "#FFD600",
+                                                      "Smartfren" : "#FF1578", "Tri" : "#9E1F64"}
+        self.convert =  {
+            1:'High Main (1)',
+            2:'Small Main (2)',
+            3:'Medium Main (3)',
+            4:'Premium Unlimited (4)',
+            5:'Economy Unlimited (5)',
+            6:'50:50 Small App and Main (6)',
+            7:'80:20 High App and Main (7)',
+            8:'20:80 Medium Main and App (8)'
+        }
+        self.operator_in_order = {'Operator': ['XL', 'Telkomsel', 'Indosat', 'AXIS', 'Tri', 'Smartfren']}
         np.random.seed(69)
         return
 
@@ -126,14 +139,14 @@ class clustering_functions:
     
     def label_clusters(self, data):
         convert = {
-            1:'High Main',
-            2:'Small Main',
-            3:'Medium Main',
-            4:'Premium Unlimited',
-            5:'Economy Unlimited',
-            6:'50:50 Small App and Main',
-            7:'80:20 High App and Main',
-            8:'20:80 Medium Main and App'
+            1:'High Main (1)',
+            2:'Small Main (2)',
+            3:'Medium Main (3)',
+            4:'Premium Unlimited (4)',
+            5:'Economy Unlimited (5)',
+            6:'50:50 Small App and Main (6)',
+            7:'80:20 High App and Main (7)',
+            8:'20:80 Medium Main and App (8)'
         }
         data['Cluster Label'] = data['Cluster'].apply(lambda key: convert[key])
 
@@ -231,6 +244,7 @@ class clustering_functions:
 
     def visualize_cluster_char_in_operator(self, data_with_clusters, cluster):
         clustered = data_with_clusters.loc[data_with_clusters['Cluster'] == cluster, :]
+        clustered = self.label_clusters((clustered))
         list_visual = []
         if cluster <= 3 :
             # Kuota Utama, Harga, Masa Berlaku
@@ -240,9 +254,11 @@ class clustering_functions:
                                 clustered,
                                 x="Operator",
                                 y= y_label,
-                                color='Operator'
+                                color='Operator',
+                                color_discrete_map=self.discrete_color2,
+                                category_orders=self.operator_in_order
                                 )
-                visual = self.set_figure(visual, None)
+                visual = self.set_figure(visual, "")
                 list_visual.append(visual)
         elif cluster <= 5 :
             # FUP, Harga, Masa Berlaku
@@ -252,9 +268,11 @@ class clustering_functions:
                                 clustered,
                                 x="Operator",
                                 y= y_label,
-                                color='Operator'
+                                color='Operator',
+                                color_discrete_map=self.discrete_color2,
+                                category_orders = self.operator_in_order
                                 )
-                visual = self.set_figure(visual, None)
+                visual = self.set_figure(visual, "")
                 list_visual.append(visual)
         else :
             # Kuota Utama, Kuota Aplikasi, Harga, Masa Berlaku
@@ -262,13 +280,17 @@ class clustering_functions:
             for y_label in y_labels :
                 if y_label == 'gabungan' :
                     visual = self.visualize_quota_group(clustered)
+                    visual = self.set_figure(visual, "")
                 else : 
                     visual = px.box(
                                 clustered,
                                 x="Operator",
                                 y= y_label,
-                                color='Operator')
-                    visual = self.set_figure(visual, None)
+                                color='Operator',
+                                color_discrete_map=self.discrete_color2,
+                                category_orders=self.operator_in_order
+                                )
+                    visual = self.set_figure(visual, "")
                 list_visual.append(visual)
 
         return tuple(list_visual)
