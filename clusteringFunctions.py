@@ -146,6 +146,7 @@ class clustering_functions:
         cluster_lmt, cluster_ulmt, cluster_apps = self.create_clusters_cmeans(4, 2, 3, scaled_data_lmt, scaled_data_ulmt, scaled_data_apps)
         data_with_clusters, data_lmt, data_ulmt, data_apps = self.create_data_with_cluster(data_lmt, data_ulmt, data_apps, 
                                                                                             cluster_lmt, cluster_ulmt, cluster_apps)
+        print(np.any(data_with_clusters.value_counts('Produk') > 1))
         combined_centers, (center_lmt, center_ulmt, center_apps) = self.create_center_cluster(data_lmt, data_ulmt, data_apps)
 
         return (data_with_clusters, data_lmt, data_ulmt, data_apps, center_lmt, center_ulmt, center_apps)

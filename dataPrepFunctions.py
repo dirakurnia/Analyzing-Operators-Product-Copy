@@ -15,7 +15,8 @@ class data_prep_functions:
         return
     
     def split_data(self, data) :
-        data_lmt = data.loc[data['Fair Usage Policy (GB)'] == 0, :]
+        data_lmt = data.loc[data['Fair Usage Policy (GB)'].values == 0, :]
+        data_lmt = data_lmt.loc[data_lmt['Kuota Aplikasi (GB)'] == 0, :]
         data_ulmt = data.loc[data['Fair Usage Policy (GB)'] != 0, :]
         data_apps =  data.loc[data['Kuota Aplikasi (GB)'] != 0, :]
         

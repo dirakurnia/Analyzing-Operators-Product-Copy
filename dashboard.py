@@ -20,7 +20,7 @@ data_with_clusters, data_lmt, data_ulmt, data_apps, center_lmt, center_ulmt, cen
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 st.set_page_config(page_title="XL's Data Product Market Position", page_icon=":reminder_ribbon:", layout="wide")
-tab1, tab2, tab3 = st.tabs(['Introduction', 'Clustering', 'Appendixes'])
+tab1, tab2, tab3, tab4 = st.tabs(['Introduction', 'Clustering Analysis', 'Yield Analysis', 'Appendixes'])
 
 with tab1:
     with st.container():
@@ -83,6 +83,9 @@ with tab2:
         st.plotly_chart(cluster_proportions, use_container_width = True)
 
 with tab3:
+    pass
+
+with tab4:
     fpc_lmt = clustering.calculate_fpc(scaled_data_lmt, 1.2)
     fpc_lmt = clustering.set_figure(fpc_lmt, 'Main Quota Product FPC C-Means Clusters Score')
     fpc_ulmt = clustering.calculate_fpc(scaled_data_ulmt, 1.2)
