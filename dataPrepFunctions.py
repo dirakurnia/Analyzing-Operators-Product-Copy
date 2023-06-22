@@ -1,6 +1,7 @@
 import warnings
 import numpy as np
 import pandas as pd
+from scipy.stats import norm
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
@@ -67,15 +68,44 @@ class data_prep_functions:
 
         return cleaned_data
     
+    def calc_probability(self, data, columns):
+        probability = pd.DataFrame()
+        for col in columns:
+            mu = data[col].mean()
+            var = data[col].var()**0.5
+            probability[col] = data[col].apply(lambda x: norm.cdf((x - mu)/var))
+            
+        return probability
+
+    def find_anomalies(self, probability, columns):
+        check_anomaly = pd.DataFrame()
+        for col in columns:
+            check_anomaly[col] = probability[col].apply(lambda x: x > 0.95)
+        check_anomaly = check_anomaly.drop(columns='Masa Berlaku (Hari)')
+        check_anomaly['Count'] = np.sum(check_anomaly, axis=1)
+        check_anomaly['Bool'] = check_anomaly['Count'] == 0
+        
+        return check_anomaly
+
+    def anomaly_detection(self, scaled_data, data, columns):
+        probability = self.calc_probability(scaled_data, columns)
+        check_anomaly = self.find_anomalies(probability, columns)
+        normal_data = data[check_anomaly['Bool'].values]
+        normal_scaled_data = scaled_data[check_anomaly['Bool'].values]
+
+        return (normal_data, normal_scaled_data)
+    
     def prepare_data(self, data):
+        data = data.loc[data['Masa Berlaku (Hari)'] <= 30, :]
         splitted_datas = self.split_data(data)
         store_scaled_datas = []
         store_datas = []
         for splitted_data, columns in zip(splitted_datas, self.columns):
             yield_data = self.generate_yield_data(splitted_data)
-            cleaned_data = self.clean_outliers(yield_data)
-            scaled_data = self.scale_data(cleaned_data, columns)
+            scaled_data = self.scale_data(yield_data, columns)
+            # cleaned_data = self.clean_outliers(yield_data)
+            cleaned_data, cleaned_scaled_data = self.anomaly_detection(scaled_data, yield_data, columns)      
             store_datas.append(cleaned_data)
-            store_scaled_datas.append(scaled_data)
+            store_scaled_datas.append(cleaned_scaled_data)
         
         return (tuple(store_datas), tuple(store_scaled_datas))

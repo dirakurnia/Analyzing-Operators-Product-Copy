@@ -4,9 +4,11 @@ import pandas as pd
 import skfuzzy as fuzz
 import plotly.express as px
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn_extra.cluster import KMedoids
+from sklearn.metrics import silhouette_score
 
 warnings.simplefilter("ignore")
 
@@ -20,17 +22,18 @@ class clustering_functions:
     def create_elbow_plot_kmeans(self, data) :
         kmeans = KMeans().fit(data)
         score = []
-        K = range(1,10)
-        for i in K:
+        for i in range(1,10):
             kmeans = KMeans(n_clusters=i,init="k-means++",random_state=0)
             kmeans.fit(data)
             score.append(kmeans.inertia_)
-        plt.plot(K,score)
-        plt.xlabel("k value")
-        plt.ylabel("wcss value")
-        plt.show()
+        elbow_dataframe = pd.DataFrame({'Number of Clusters':[i for i in range(1,10)], 'Elbow Score':score})
+        elbow_plot = px.line(
+            elbow_dataframe,
+            x='Number of Clusters',
+            y='Elbow Score'
+        )
 
-        return
+        return elbow_plot
 
     def create_elbow_plot_kmedians(self, data) :
         kmeans = KMedoids().fit(data)
@@ -47,6 +50,21 @@ class clustering_functions:
 
         return
     
+    def calculate_silhouette_score(self, data):
+        range_n_clusters = [i for i in range(2, 9)]
+        silhouette_avg = []
+        for n_clusters in range_n_clusters:
+            clusters = self.create_clusters_kmeans(n_clusters, data)
+            silhouette_avg.append(silhouette_score(data, clusters))
+        silhoutte_data = pd.DataFrame({'Number of Clusters':range_n_clusters, 'Silhouette Score':silhouette_avg})
+        silhouette_plot = px.line(
+            silhoutte_data,
+            x='Number of Clusters',
+            y='Silhouette Score'
+        )
+
+        return silhouette_plot
+
     def calculate_fpc(self, data, param):
         data = data.values.T
         store_fpc = []
@@ -62,43 +80,23 @@ class clustering_functions:
         
         return fpc_score
     
-    def create_clusters_kmeans(self, k_lmt, k_ulmt, k_apps, data_lmt, data_ulmt, data_apps):
-        store_k = [k_lmt, k_ulmt, k_apps]
-        store_scaled_data = [data_lmt, data_ulmt, data_apps]
-        store_clusters = []
-        for k, scaled_data in zip(store_k, store_scaled_data):
-            kmeans = KMeans(n_clusters=k, init="k-means++").fit(scaled_data)
-            clusters = kmeans.labels_ + 1
-            store_clusters.append(clusters)
-        store_clusters[1] = store_clusters[1] + k_lmt
-        store_clusters[2] = store_clusters[2] + k_lmt + k_ulmt
+    def create_clusters_kmeans(self, n_cluster, data):
+        kmeans = KMeans(n_clusters=n_cluster, init="k-means++").fit(data)
+        clusters = kmeans.labels_ + 1
 
-        return tuple(store_clusters)
+        return clusters
 
-    def create_clusters_kmedians(self, k_lmt, k_ulmt, k_apps, data_lmt, data_ulmt, data_apps):
-        store_k = [k_lmt, k_ulmt, k_apps]
-        store_scaled_data = [data_lmt, data_ulmt, data_apps]
-        store_clusters = []
-        for k, scaled_data in zip(store_k, store_scaled_data):
-            kmedians = KMedoids(n_clusters=k, init="k-medoids++").fit(scaled_data)
-            clusters = kmedians.labels_ + 1
-            store_clusters.append(clusters)
-        store_clusters[1] = store_clusters[1] + k_lmt
-        store_clusters[2] = store_clusters[2] + k_lmt + k_ulmt
-
-        return tuple(store_clusters)
+    def create_clusters_kmedians(self, n_cluster, data):
+        kmedians = KMedoids(n_clusters=n_cluster, init="k-medoids++").fit(data)
+        clusters = kmedians.labels_ + 1
     
-    def create_clusters_cmeans(self, k_lmt, k_ulmt, k_apps, scaled_lmt, scaled_ulmt, scaled_apps) :
-        store_k = [k_lmt, k_ulmt, k_apps]
-        store_scaled_data = [scaled_lmt, scaled_ulmt, scaled_apps]
-        params = [1.2, 1.2, 1.3]
-        store_clusters = []
-        for k, scaled_data, param in zip(store_k, store_scaled_data, params):
-            cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(scaled_data.values.T, k, param, error=0.005, maxiter=1000, init=None)
-            cluster = np.argmax(u, axis=0) + 1
-            store_clusters.append(cluster)
+        return clusters
+    
+    def create_clusters_cmeans(self, n_cluster, param, data):
+        cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(data.values.T, n_cluster, param, error=0.005, maxiter=1000, init=None)
+        cluster = np.argmax(u, axis=0) + 1
 
-        return tuple(store_clusters)
+        return cluster
     
     def create_data_with_cluster(self, data_lmt, data_ulmt, data_apps, cluster_lmt, cluster_ulmt, cluster_apps):
         data_lmt['Cluster'] = cluster_lmt
@@ -128,25 +126,25 @@ class clustering_functions:
     
     def label_clusters(self, data):
         convert = {
-            1:'High Main and Price',
-            2:'Low Main, Long Period',
-            3:'Low Main, Short Period',
-            4:'Mid Main and Price',
-            5:'Low Unlimited and Price',
-            6:'Mid-High Unlimited and Price',
-            7:'80:20 Main and App, High Price',
-            8:'20:80 Main and App, Medium Price',
-            9:'50:50 App and Main, Low Price',
+            1:'High Main',
+            2:'Small Main',
+            3:'Medium Main',
+            4:'Premium Unlimited',
+            5:'Economy Unlimited',
+            6:'50:50 Small App and Main',
+            7:'80:20 High App and Main',
+            8:'20:80 Medium Main and App'
         }
         data['Cluster Label'] = data['Cluster'].apply(lambda key: convert[key])
 
         return data
 
     def create_clusters(self, data_lmt, data_ulmt, data_apps, scaled_data_lmt, scaled_data_ulmt, scaled_data_apps):
-        cluster_lmt, cluster_ulmt, cluster_apps = self.create_clusters_cmeans(4, 2, 3, scaled_data_lmt, scaled_data_ulmt, scaled_data_apps)
+        cluster_lmt =  self.create_clusters_kmeans(3, scaled_data_lmt)
+        cluster_ulmt = self.create_clusters_kmeans(2, scaled_data_ulmt)
+        cluster_apps=  self.create_clusters_cmeans(3, 1.3,scaled_data_apps)
         data_with_clusters, data_lmt, data_ulmt, data_apps = self.create_data_with_cluster(data_lmt, data_ulmt, data_apps, 
                                                                                             cluster_lmt, cluster_ulmt, cluster_apps)
-        print(np.any(data_with_clusters.value_counts('Produk') > 1))
         combined_centers, (center_lmt, center_ulmt, center_apps) = self.create_center_cluster(data_lmt, data_ulmt, data_apps)
 
         return (data_with_clusters, data_lmt, data_ulmt, data_apps, center_lmt, center_ulmt, center_apps)
@@ -208,45 +206,78 @@ class clustering_functions:
 
         return (limited_quota_vis, unlimited_quota_vis, internet_apps_quota_vis)
 
-    def _visualize_cluster_distributions(self, data_with_clusters, cluster) :
-        clustered = data_with_clusters.loc[data_with_clusters['Cluster'] == int(cluster), :]
-        op_clustered = clustered.loc[clustered['Operator'].isin(['Telkomsel', 'Indosat', 'Smartfren', 'Tri']), :]
-        xl_axis_clustered = clustered.loc[clustered['Operator'].isin(['XL', 'AXIS']), :]
-        operator_color_dict = {"AXIS" : "RebeccaPurple", "XL" : "RoyalBlue", "Telkomsel" : "IndianRed",
-                            "Indosat" : "Yellow", "Smartfren" : "OrangeRed", "Tri" : "Fuchsia"}
-        if int(cluster) <= 4 :
-            x_label = "Kuota Utama (GB)"
-            size = None
-        elif 4 < int(cluster) <= 6 :
-            x_label = "Fair Usage Policy (GB)"
-            size = None
+    def visualize_quota_group(self, data):
+        fig = go.Figure()
+        x = list(data['Operator'])
+        fig.add_trace(go.Box( 
+                            x = x,
+                            y = list(data['Kuota Utama (GB)']),
+                            name = "Kuota Utama",
+                            ))
+        fig.add_trace(go.Box( 
+                            x = x,
+                            y = list(data['Kuota Aplikasi (GB)']),
+                            name = "Kuota Aplikasi",
+                            ))
+        fig.update_layout(boxmode='group')
+        fig.update_layout(
+            xaxis_title="Operators",
+            yaxis_title="Kuota (GB)",
+            legend_title="Klasifikasi Kuota"
+            )
+        fig = self.set_figure(fig, None)
+
+        return fig
+
+    def visualize_cluster_char_in_operator(self, data_with_clusters, cluster):
+        clustered = data_with_clusters.loc[data_with_clusters['Cluster'] == cluster, :]
+        list_visual = []
+        if cluster <= 3 :
+            # Kuota Utama, Harga, Masa Berlaku
+            y_labels = ['Kuota Utama (GB)', 'Harga']
+            for y_label in y_labels :
+                visual = px.box(
+                                clustered,
+                                x="Operator",
+                                y= y_label,
+                                color='Operator'
+                                )
+                visual = self.set_figure(visual, None)
+                list_visual.append(visual)
+        elif cluster <= 5 :
+            # FUP, Harga, Masa Berlaku
+            y_labels = ['Fair Usage Policy (GB)', 'Harga']
+            for y_label in y_labels :
+                visual = px.box(
+                                clustered,
+                                x="Operator",
+                                y= y_label,
+                                color='Operator'
+                                )
+                visual = self.set_figure(visual, None)
+                list_visual.append(visual)
         else :
-            x_label = "Kuota Utama (GB)"
-            size = "Kuota Aplikasi (GB)"
-        cluster_dist = px.scatter(
-                xl_axis_clustered,
-                x=x_label,
-                color="Operator",
-                y="Harga",
-                size=size,
-                color_discrete_map= operator_color_dict)
-        op_cluster_dist = px.scatter(
-                op_clustered,
-                x=x_label,
-                color="Operator",
-                y="Harga",
-                size=size,
-                color_discrete_map= operator_color_dict)
-        op_cluster_dist = self.set_figure(op_cluster_dist, "Operators Other Than XL and AXIS Data Product in Cluster {} Distributions".format(str(cluster)))
-        cluster_dist = self.set_figure(cluster_dist, "XL and Axis Data Product Cluster {} Distributions".format(str(cluster)))
-        
-        return (op_cluster_dist, cluster_dist)
+            # Kuota Utama, Kuota Aplikasi, Harga, Masa Berlaku
+            y_labels = ['gabungan', 'Harga']
+            for y_label in y_labels :
+                if y_label == 'gabungan' :
+                    visual = self.visualize_quota_group(clustered)
+                else : 
+                    visual = px.box(
+                                clustered,
+                                x="Operator",
+                                y= y_label,
+                                color='Operator')
+                    visual = self.set_figure(visual, None)
+                list_visual.append(visual)
+
+        return tuple(list_visual)
 
     def visualize_count_each_clusters(self, data_with_clusters):
         cluster_labels = [
-            [1, 2, 3, 4],
-            [5, 6], 
-            [7, 8, 9]
+            [1, 2, 3],
+            [4, 5], 
+            [6, 7, 8]
             ]
         store_proportion = np.array([])
         store_count = np.array([]) 
